@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Source+Sans+3:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 42 55% 96%;
+    --foreground: 88 35% 14%;
+    --card: 42 50% 98%;
+    --card-foreground: 88 35% 14%;
+    --popover: 42 50% 98%;
+    --popover-foreground: 88 35% 14%;
+    --primary: 42 88% 48%;
+    --primary-foreground: 88 35% 10%;
+    --secondary: 88 35% 18%;
+    --secondary-foreground: 42 55% 96%;
+    --muted: 42 30% 90%;
+    --muted-foreground: 88 15% 36%;
+    --accent: 152 35% 34%;
+    --accent-foreground: 42 55% 96%;
+    --destructive: 4 72% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 45% 32%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 90% 52%;
+    --warning-foreground: 88 35% 10%;
+    --amber: 42 88% 48%;
+    --forest: 88 35% 18%;
+    --wax: 42 55% 96%;
+    --pollen: 32 90% 52%;
+    --border: 42 25% 82%;
+    --input: 42 25% 82%;
+    --ring: 42 88% 48%;
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 88 28% 8%;
+    --foreground: 42 55% 94%;
+    --card: 88 24% 12%;
+    --card-foreground: 42 55% 94%;
+    --popover: 88 24% 12%;
+    --popover-foreground: 42 55% 94%;
+    --primary: 42 85% 52%;
+    --primary-foreground: 88 28% 8%;
+    --secondary: 88 22% 16%;
+    --secondary-foreground: 42 55% 94%;
+    --muted: 88 18% 14%;
+    --muted-foreground: 42 20% 62%;
+    --accent: 152 35% 38%;
+    --accent-foreground: 42 55% 94%;
+    --destructive: 4 62% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 40% 42%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 85% 50%;
+    --warning-foreground: 88 28% 8%;
+    --amber: 42 85% 52%;
+    --forest: 88 35% 18%;
+    --wax: 42 55% 94%;
+    --pollen: 32 85% 50%;
+    --border: 88 18% 20%;
+    --input: 88 18% 20%;
+    --ring: 42 85% 52%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Source Sans 3', system-ui, sans-serif;
+  }
+  h1, h2, h3, .font-display {
+    font-family: 'Fraunces', Georgia, serif;
+  }
+}
+
+@layer components {
+  .hive-card {
+    @apply border bg-card shadow-sm;
+    border-radius: var(--radius);
+    background-image:
+      linear-gradient(160deg, hsl(var(--card)) 0%, hsl(var(--muted) / 0.35) 100%),
+      radial-gradient(circle at top right, hsl(var(--amber) / 0.08), transparent 55%);
+  }
+
+  .hive-table {
+    @apply w-full text-sm;
+  }
+
+  .hive-table thead tr {
+    @apply border-b border-border bg-muted/50 text-left text-muted-foreground;
+  }
+
+  .hive-table th {
+    @apply px-3 py-2.5 text-xs font-semibold uppercase tracking-wide;
+  }
+
+  .hive-table td {
+    @apply border-b border-border/50 px-3 py-2.5;
+  }
+
+  .hive-table tbody tr:hover {
+    @apply bg-muted/30;
+  }
+
+  .hive-divider {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-amber/40 to-transparent;
+  }
+}

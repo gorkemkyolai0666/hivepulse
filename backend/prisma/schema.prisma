@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  owner
+  manager
+  beekeeper
+}
+
+enum HiveStatus {
+  active
+  queenless
+  swarm_risk
+  wintering
+  inactive
+}
+
+enum HiveType {
+  langstroth
+  top_bar
+  warre
+  flow
+}
+
+enum HarvestStatus {
+  planned
+  extracted
+  stored
+  sold
+}
+
+enum HarvestContainer {
+  bucket
+  drum
+  jar_batch
+  comb
+}
+
+enum InspectionStatus {
+  scheduled
+  completed
+  follow_up
+  cancelled
+}
+
+enum BroodPattern {
+  excellent
+  good
+  fair
+  poor
+}
+
+enum Temperament {
+  calm
+  moderate
+  aggressive
+}
+
+enum TreatmentStatus {
+  scheduled
+  in_progress
+  completed
+  overdue
+}
+
+enum TreatmentCategory {
+  varroa
+  nosema
+  wax_moth
+  feeding
+  queen_rearing
+  other
+}
+
+enum HoneyVarietyCategory {
+  wildflower
+  clover
+  acacia
+  chestnut
+  lavender
+  forest
+  citrus
+  other
+}
+
+enum HoneyVarietyStatus {
+  active
+  seasonal
+  discontinued
+}
+
+model Apiary {
+  id         String   @id @default(uuid())
+  name       String
+  phone      String?
+  address    String?
+  city       String?
+  state      String?
+  zipCode    String?  @map("zip_code")
+  totalHives Int      @default(48) @map("total_hives")
+  timezone   String   @default("Europe/Istanbul")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  users          User[]
+  hives          Hive[]
+  harvests       Harvest[]
+  inspections    Inspection[]
+  treatments     Treatment[]
+  honeyVarieties HoneyVariety[]
+
+  @@map("apiaries")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  firstName    String   @map("first_name")
+  lastName     String   @map("last_name")
+  role         UserRole @default(owner)
+  apiaryId     String   @map("apiary_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  apiary Apiary @relation(fields: [apiaryId], references: [id], onDelete: Cascade)
+
+  @@map("users")
+}
+
+model Hive {
+  id             String     @id @default(uuid())
+  apiaryId       String     @map("apiary_id")
+  number         String
+  location       String
+  hiveType       HiveType   @default(langstroth) @map("hive_type")
+  queenAgeMonths Int?       @map("queen_age_months")
+  status         HiveStatus @default(active)
+  lastInspected  DateTime?  @map("last_inspected") @db.Date
+  notes          String?
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  apiary      Apiary       @relation(fields: [apiaryId], references: [id], onDelete: Cascade)
+  inspections Inspection[]
+  harvests    Harvest[]
+
+  @@unique([apiaryId, number])
+  @@index([apiaryId, status])
+  @@map("hives")
+}
+
+model Harvest {
+  id           String           @id @default(uuid())
+  apiaryId     String           @map("apiary_id")
+  hiveId       String?          @map("hive_id")
+  batchName    String           @map("batch_name")
+  floralSource String?          @map("floral_source")
+  weightKg     Float            @map("weight_kg")
+  container    HarvestContainer @default(bucket)
+  status       HarvestStatus    @default(planned)
+  harvestedAt  DateTime?        @map("harvested_at") @db.Date
+  notes        String?
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  apiary Apiary @relation(fields: [apiaryId], references: [id], onDelete: Cascade)
+  hive   Hive?  @relation(fields: [hiveId], references: [id], onDelete: SetNull)
+
+  @@index([apiaryId, status])
+  @@map("harvests")
+}
+
+model Inspection {
+  id           String           @id @default(uuid())
+  apiaryId     String           @map("apiary_id")
+  hiveId       String           @map("hive_id")
+  inspectedAt  DateTime         @map("inspected_at")
+  broodPattern BroodPattern     @default(good) @map("brood_pattern")
+  temperament  Temperament      @default(calm)
+  honeyStores  Float?           @map("honey_stores")
+  status       InspectionStatus @default(completed)
+  notes        String?
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  apiary Apiary @relation(fields: [apiaryId], references: [id], onDelete: Cascade)
+  hive   Hive   @relation(fields: [hiveId], references: [id], onDelete: Cascade)
+
+  @@index([apiaryId, status])
+  @@index([apiaryId, inspectedAt])
+  @@map("inspections")
+}
+
+model Treatment {
+  id          String            @id @default(uuid())
+  apiaryId    String            @map("apiary_id")
+  title       String
+  description String?
+  category    TreatmentCategory @default(varroa)
+  location    String?
+  scheduledAt DateTime          @map("scheduled_at")
+  status      TreatmentStatus   @default(scheduled)
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  apiary Apiary @relation(fields: [apiaryId], references: [id], onDelete: Cascade)
+
+  @@index([apiaryId, scheduledAt])
+  @@map("treatments")
+}
+
+model HoneyVariety {
+  id              String               @id @default(uuid())
+  apiaryId        String               @map("apiary_id")
+  title           String
+  varietyCategory HoneyVarietyCategory @default(wildflower) @map("variety_category")
+  status          HoneyVarietyStatus   @default(active)
+  pricePerKg      Float                @map("price_per_kg")
+  moisturePercent Float?               @map("moisture_percent")
+  notes           String?
+  createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @updatedAt @map("updated_at")
+
+  apiary Apiary @relation(fields: [apiaryId], references: [id], onDelete: Cascade)
+
+  @@index([apiaryId, varietyCategory])
+  @@map("honey_varieties")
+}
